@@ -41,9 +41,21 @@ router.post('/', async (req, res) => {
     const filePath = path.join(UPLOADS_DIR, fileName);
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // 1. Save locally to assets/uploads
-    fs.writeFileSync(filePath, buffer);
-    let publicUrl = `http://localhost:5000/assets/uploads/${fileName}`;
+    // 1. Dynamic host URL fallback (works on both localhost and deployed servers like Render)
+    const host = req.get('host');
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const serverBaseUrl = process.env.RENDER_EXTERNAL_URL || `${protocol}://${host}`;
+    let publicUrl = `${serverBaseUrl}/assets/uploads/${fileName}`;
+
+    // Try saving locally (best effort)
+    try {
+      if (!fs.existsSync(UPLOADS_DIR)) {
+        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+      }
+      fs.writeFileSync(filePath, buffer);
+    } catch (fsErr) {
+      console.warn('Local fs write skipped:', fsErr.message);
+    }
 
     // 2. Try uploading to Supabase Storage bucket 'portfolio-assets'
     try {
@@ -62,10 +74,12 @@ router.post('/', async (req, res) => {
           if (urlData && urlData.publicUrl) {
             publicUrl = urlData.publicUrl;
           }
+        } else if (error) {
+          console.warn('Supabase storage upload returned error:', error.message);
         }
       }
     } catch (sbError) {
-      console.warn('Supabase storage upload skipped or failed, using local URL:', sbError.message);
+      console.warn('Supabase storage upload skipped or failed, using backend URL:', sbError.message);
     }
 
     res.json({
