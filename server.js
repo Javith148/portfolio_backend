@@ -11,6 +11,7 @@ import skillRoutes from './routes/skillRoutes.js';
 import certificateRoutes from './routes/certificateRoutes.js';
 import seedRoutes from './routes/seedRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import aboutRoutes from './routes/aboutRoutes.js';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/about', aboutRoutes);
 
 // Base Health Check Route
 app.get('/', (req, res) => {
