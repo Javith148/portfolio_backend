@@ -14,26 +14,18 @@ router.get('/', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      const storeMap = new Map((store.projects || []).map(sp => [sp.id, sp]));
-
-      // Check if all DB projects have the identical default gradient or missing gradient
-      const firstGrad = data[0].gradient || data[0].color;
-      const allIdenticalInDb = data.every(p => (p.gradient || p.color) === firstGrad);
+      const storeMap = new Map((store.projects || []).map(sp => [String(sp.id), sp]));
 
       const mergedProjects = data.map((dbProj, index) => {
-        const local = storeMap.get(dbProj.id) || {};
+        const local = storeMap.get(String(dbProj.id)) || {};
         
         // Priority:
-        // 1. Customized local gradient from store if available
-        // 2. Explicit gradient/color from dbProj (if not identical across all rows or if custom)
+        // 1. Explicit gradient/color from dbProj (if stored in Supabase)
+        // 2. Customized local gradient from store if available
         // 3. Fallback to distinct preset gradient based on index
-        let finalGradient = local.gradient || local.color;
+        let finalGradient = dbProj.gradient || dbProj.color || local.gradient || local.color;
         if (!finalGradient) {
-          if (!allIdenticalInDb && (dbProj.gradient || dbProj.color)) {
-            finalGradient = dbProj.gradient || dbProj.color;
-          } else {
-            finalGradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
-          }
+          finalGradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
         }
 
         return {
@@ -49,9 +41,9 @@ router.get('/', async (req, res) => {
       });
 
       // Also append local projects not found in Supabase data
-      const dbIds = new Set(data.map(d => d.id));
+      const dbIds = new Set(data.map(d => String(d.id)));
       (store.projects || []).forEach(sp => {
-        if (!dbIds.has(sp.id)) mergedProjects.push(sp);
+        if (!dbIds.has(String(sp.id))) mergedProjects.push(sp);
       });
 
       // Cache updated list in store
