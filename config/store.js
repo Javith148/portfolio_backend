@@ -4,19 +4,38 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const storeFilePath = path.join(__dirname, '..', 'data', 'store.json');
 
-const INITIAL_PROJECTS = [];
-const INITIAL_SKILLS = [];
-const INITIAL_CERTS = [];
-const INITIAL_MESSAGES = [];
+export const DEFAULT_GRADIENTS = [
+  'linear-gradient(175deg, #EB7B18 0%, #737373 100%)', // Orange Sunset
+  'linear-gradient(175deg, #7F17DA 0%, #737373 100%)', // Royal Purple
+  'linear-gradient(175deg, #4851FF 0%, #737373 100%)', // Cyber Blue
+  'linear-gradient(175deg, #30B45C 0%, #737373 100%)', // Emerald Green
+  'linear-gradient(175deg, #D91A1A 0%, #222222 100%)'  // Crimson Red
+];
 
-// In-memory runtime data store (NO disk file writing to store.json)
 let memoryStore = {
-  projects: INITIAL_PROJECTS,
-  skills: INITIAL_SKILLS,
-  certificates: INITIAL_CERTS,
-  contacts: INITIAL_MESSAGES
+  projects: [],
+  skills: [],
+  certificates: [],
+  contacts: []
 };
+
+// Try loading from store.json on startup
+try {
+  if (fs.existsSync(storeFilePath)) {
+    const raw = fs.readFileSync(storeFilePath, 'utf8');
+    const parsed = JSON.parse(raw);
+    memoryStore = {
+      projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+      skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+      certificates: Array.isArray(parsed.certificates) ? parsed.certificates : [],
+      contacts: Array.isArray(parsed.contacts) ? parsed.contacts : []
+    };
+  }
+} catch (e) {
+  console.error('Failed to load store.json:', e.message);
+}
 
 export function getLocalStore() {
   return memoryStore;
@@ -30,5 +49,15 @@ export function saveLocalStore(data) {
       certificates: data.certificates || memoryStore.certificates,
       contacts: data.contacts || memoryStore.contacts
     };
+    try {
+      const dataDir = path.join(__dirname, '..', 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      fs.writeFileSync(storeFilePath, JSON.stringify(memoryStore, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Failed to write store.json:', e.message);
+    }
   }
 }
+

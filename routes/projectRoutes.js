@@ -1,6 +1,6 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
-import { getLocalStore, saveLocalStore } from '../config/store.js';
+import { getLocalStore, saveLocalStore, DEFAULT_GRADIENTS } from '../config/store.js';
 
 const router = express.Router();
 
@@ -13,14 +13,34 @@ router.get('/', async (req, res) => {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data)) {
+    if (!error && Array.isArray(data) && data.length > 0) {
       const storeMap = new Map((store.projects || []).map(sp => [sp.id, sp]));
-      const mergedProjects = data.map(dbProj => {
+
+      // Check if all DB projects have the identical default gradient or missing gradient
+      const firstGrad = data[0].gradient || data[0].color;
+      const allIdenticalInDb = data.every(p => (p.gradient || p.color) === firstGrad);
+
+      const mergedProjects = data.map((dbProj, index) => {
         const local = storeMap.get(dbProj.id) || {};
+        
+        // Priority:
+        // 1. Customized local gradient from store if available
+        // 2. Explicit gradient/color from dbProj (if not identical across all rows or if custom)
+        // 3. Fallback to distinct preset gradient based on index
+        let finalGradient = local.gradient || local.color;
+        if (!finalGradient) {
+          if (!allIdenticalInDb && (dbProj.gradient || dbProj.color)) {
+            finalGradient = dbProj.gradient || dbProj.color;
+          } else {
+            finalGradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
+          }
+        }
+
         return {
           ...dbProj,
           short_desc: dbProj.short_desc || local.short_desc || dbProj.description?.substring(0, 120) || '',
-          gradient: dbProj.gradient || local.gradient || 'linear-gradient(175deg, #7F17DA 0%, #737373 100%)',
+          gradient: finalGradient,
+          color: finalGradient,
           live_link: dbProj.live_link || local.live_link || '#',
           github_link: dbProj.github_link || local.github_link || '#',
           is_featured: dbProj.is_featured !== undefined ? dbProj.is_featured : (local.is_featured !== undefined ? local.is_featured : true),
@@ -34,10 +54,20 @@ router.get('/', async (req, res) => {
         if (!dbIds.has(sp.id)) mergedProjects.push(sp);
       });
 
+      // Cache updated list in store
+      saveLocalStore({ ...store, projects: mergedProjects });
+
       return res.json({ success: true, count: mergedProjects.length, projects: mergedProjects });
     }
 
-    res.json({ success: true, count: store.projects.length, projects: store.projects });
+    // Fallback if Supabase error or empty
+    const storeMap = store.projects || [];
+    const fallbackProjects = storeMap.map((p, index) => {
+      const g = p.gradient || p.color || DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
+      return { ...p, gradient: g, color: g };
+    });
+
+    res.json({ success: true, count: fallbackProjects.length, projects: fallbackProjects });
   } catch (err) {
     const store = getLocalStore();
     res.json({ success: true, count: store.projects.length, projects: store.projects });
@@ -78,13 +108,14 @@ router.put('/reorder', async (req, res) => {
 // POST create project
 router.post('/', async (req, res) => {
   try {
-    const { title, description, short_desc, category, image_url, live_link, github_link, gradient, tags, display_order, is_featured } = req.body;
+    const { title, description, short_desc, category, image_url, live_link, github_link, gradient, color, tags, display_order, is_featured } = req.body;
 
     if (!title || !description) {
       return res.status(400).json({ success: false, error: 'Title and description are required' });
     }
 
     const tagsArray = Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()) : []);
+    const projGradient = gradient || color || DEFAULT_GRADIENTS[0];
 
     const fullProjectData = {
       title,
@@ -94,7 +125,8 @@ router.post('/', async (req, res) => {
       image_url: image_url || '',
       live_link: live_link || '#',
       github_link: github_link || '#',
-      gradient: gradient || 'linear-gradient(175deg, #7F17DA 0%, #737373 100%)',
+      gradient: projGradient,
+      color: projGradient,
       tags: tagsArray,
       display_order: display_order !== undefined ? Number(display_order) : 0,
       is_featured: is_featured !== undefined ? is_featured : true
@@ -143,13 +175,20 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const body = req.body;
 
-    const allowedKeys = ['title', 'description', 'short_desc', 'category', 'image_url', 'live_link', 'github_link', 'gradient', 'tags', 'display_order', 'is_featured'];
+    const updatedGradient = body.gradient || body.color;
+
+    const allowedKeys = ['title', 'description', 'short_desc', 'category', 'image_url', 'live_link', 'github_link', 'gradient', 'color', 'tags', 'display_order', 'is_featured'];
     const supabasePayload = {};
     Object.keys(body).forEach(key => {
       if (allowedKeys.includes(key)) {
         supabasePayload[key] = body[key];
       }
     });
+
+    if (updatedGradient) {
+      supabasePayload.gradient = updatedGradient;
+      supabasePayload.color = updatedGradient;
+    }
 
     if (Object.keys(supabasePayload).length > 0) {
       try {
@@ -164,15 +203,22 @@ router.put('/:id', async (req, res) => {
     }
 
     const store = getLocalStore();
-    const idx = store.projects.findIndex(p => p.id === id);
+    const idx = store.projects.findIndex(p => String(p.id) === String(id));
     if (idx !== -1) {
       store.projects[idx] = {
         ...store.projects[idx],
         ...body,
+        gradient: updatedGradient || store.projects[idx].gradient,
+        color: updatedGradient || store.projects[idx].color,
         tags: Array.isArray(body.tags) ? body.tags : (body.tags ? body.tags.split(',').map(t => t.trim()) : store.projects[idx].tags)
       };
     } else {
-      store.projects.push({ id, ...body });
+      store.projects.push({ 
+        id, 
+        ...body,
+        gradient: updatedGradient,
+        color: updatedGradient
+      });
     }
     saveLocalStore(store);
 
@@ -192,7 +238,7 @@ router.delete('/:id', async (req, res) => {
     } catch (e) {}
 
     const store = getLocalStore();
-    store.projects = store.projects.filter(p => p.id !== id);
+    store.projects = store.projects.filter(p => String(p.id) !== String(id));
     saveLocalStore(store);
 
     res.json({ success: true, message: 'Project deleted successfully' });
@@ -202,4 +248,5 @@ router.delete('/:id', async (req, res) => {
 });
 
 export default router;
+
 
