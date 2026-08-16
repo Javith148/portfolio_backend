@@ -65,7 +65,47 @@ CREATE TABLE IF NOT EXISTS public.contacts (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 6. Initial Super Admin User (Default username: superadmin, password: superpassword123 - bcrypt hashed)
+-- 6. Create About Content Table
+CREATE TABLE IF NOT EXISTS public.about_content (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. Create Journey Items (Timeline) Table
+CREATE TABLE IF NOT EXISTS public.journey_items (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  type TEXT DEFAULT 'Education',
+  title TEXT NOT NULL,
+  organization TEXT NOT NULL,
+  period TEXT,
+  location TEXT,
+  description TEXT,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Disable RLS or grant access for smooth sync
+ALTER TABLE public.journey_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.about_content DISABLE ROW LEVEL SECURITY;
+
+-- Initial Journey Sample Data (Optional Seed)
+INSERT INTO public.journey_items (type, title, organization, period, location, description, display_order)
+VALUES 
+  ('Education', 'B.E. Computer Science Engineering', 'University / College', '2021 - 2025', 'Tamil Nadu, India', 'Specialized in Core Computer Science, Software Architecture, Data Structures, Web Technologies & Mobile App Development.', 0),
+  ('Work Experience', 'Full Stack & Mobile Developer', 'Freelance / Projects', '2023 - Present', 'Remote', 'Developed cross-platform Flutter mobile applications and modern React web applications with Node.js & Django backends.', 1)
+ON CONFLICT DO NOTHING;
+
+-- Initial About Content Sample Data (Optional Seed)
+INSERT INTO public.about_content (title, description, display_order)
+VALUES 
+  ('🎨 Creative Problem Solving', 'I love crafting intuitive user interfaces with Flutter & React, while maintaining high performant backends.', 0),
+  ('⚡ Passionate Learner', 'Constantly learning modern tech stacks, cloud services, database design, and architecture best practices.', 1)
+ON CONFLICT DO NOTHING;
+
+-- 8. Initial Super Admin User (Default username: superadmin, password: superpassword123 - bcrypt hashed)
 INSERT INTO public.admins (username, password_hash, role, email)
 VALUES (
   'superadmin', 
@@ -82,3 +122,5 @@ VALUES (
   'admin', 
   'javithsukkur@gmail.com'
 ) ON CONFLICT (username) DO NOTHING;
+
+

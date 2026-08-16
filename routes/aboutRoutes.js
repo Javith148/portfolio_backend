@@ -17,7 +17,10 @@ router.get('/content', async (req, res) => {
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
+    if (!error && Array.isArray(data)) {
+      const store = getLocalStore();
+      store.aboutContent = data;
+      saveLocalStore(store);
       return res.json({ success: true, count: data.length, content: data });
     }
 
@@ -43,16 +46,23 @@ router.post('/content', async (req, res) => {
       display_order: display_order !== undefined ? Number(display_order) : 0
     };
 
-    let assignedId = "abt_" + Date.now();
+    let assignedId = null;
+    let dbItem = null;
 
     try {
       const { data, error } = await supabase.from('about_content').insert([newContent]).select();
+      if (error) {
+        console.error('Supabase insert about_content error:', error.message);
+      }
       if (!error && data && data[0]) {
         assignedId = data[0].id;
+        dbItem = data[0];
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Supabase exception inserting about_content:', e.message);
+    }
 
-    const finalItem = { id: assignedId, ...newContent };
+    const finalItem = dbItem || { id: "abt_" + Date.now(), ...newContent, created_at: new Date().toISOString() };
     const store = getLocalStore();
     if (!store.aboutContent) store.aboutContent = [];
     store.aboutContent.push(finalItem);
@@ -70,8 +80,15 @@ router.put('/content/:id', async (req, res) => {
     const { id } = req.params;
     const body = req.body;
 
+    const allowedKeys = ['title', 'description', 'display_order'];
+    const payload = {};
+    Object.keys(body).forEach(k => {
+      if (allowedKeys.includes(k)) payload[k] = body[k];
+    });
+
     try {
-      await supabase.from('about_content').update(body).eq('id', id);
+      const { error } = await supabase.from('about_content').update(payload).eq('id', id);
+      if (error) console.error('Supabase update about_content error:', error.message);
     } catch (e) {}
 
     const store = getLocalStore();
@@ -95,7 +112,8 @@ router.delete('/content/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-      await supabase.from('about_content').delete().eq('id', id);
+      const { error } = await supabase.from('about_content').delete().eq('id', id);
+      if (error) console.error('Supabase delete about_content error:', error.message);
     } catch (e) {}
 
     const store = getLocalStore();
@@ -160,7 +178,10 @@ router.get('/journey', async (req, res) => {
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
+    if (!error && Array.isArray(data)) {
+      const store = getLocalStore();
+      store.journeyItems = data;
+      saveLocalStore(store);
       return res.json({ success: true, count: data.length, journey: data });
     }
 
@@ -190,16 +211,23 @@ router.post('/journey', async (req, res) => {
       display_order: display_order !== undefined ? Number(display_order) : 0
     };
 
-    let assignedId = "jrn_" + Date.now();
+    let assignedId = null;
+    let dbItem = null;
 
     try {
       const { data, error } = await supabase.from('journey_items').insert([newJourney]).select();
+      if (error) {
+        console.error('Supabase insert journey_items error:', error.message);
+      }
       if (!error && data && data[0]) {
         assignedId = data[0].id;
+        dbItem = data[0];
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Supabase exception inserting journey item:', e.message);
+    }
 
-    const finalItem = { id: assignedId, ...newJourney };
+    const finalItem = dbItem || { id: "jrn_" + Date.now(), ...newJourney, created_at: new Date().toISOString() };
     const store = getLocalStore();
     if (!store.journeyItems) store.journeyItems = [];
     store.journeyItems.push(finalItem);
@@ -217,8 +245,15 @@ router.put('/journey/:id', async (req, res) => {
     const { id } = req.params;
     const body = req.body;
 
+    const allowedKeys = ['type', 'title', 'organization', 'period', 'location', 'description', 'display_order'];
+    const payload = {};
+    Object.keys(body).forEach(k => {
+      if (allowedKeys.includes(k)) payload[k] = body[k];
+    });
+
     try {
-      await supabase.from('journey_items').update(body).eq('id', id);
+      const { error } = await supabase.from('journey_items').update(payload).eq('id', id);
+      if (error) console.error('Supabase update journey_items error:', error.message);
     } catch (e) {}
 
     const store = getLocalStore();
@@ -242,7 +277,8 @@ router.delete('/journey/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-      await supabase.from('journey_items').delete().eq('id', id);
+      const { error } = await supabase.from('journey_items').delete().eq('id', id);
+      if (error) console.error('Supabase delete journey_items error:', error.message);
     } catch (e) {}
 
     const store = getLocalStore();
@@ -294,3 +330,4 @@ router.put('/journey/reorder', async (req, res) => {
 });
 
 export default router;
+
