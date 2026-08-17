@@ -1,6 +1,6 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
-import { getLocalStore, saveLocalStore } from '../config/store.js';
+import { getLocalStore, saveLocalStore, DEFAULT_ABOUT_CONTENT, DEFAULT_JOURNEY_ITEMS } from '../config/store.js';
 
 const router = express.Router();
 
@@ -11,24 +11,48 @@ const router = express.Router();
 // GET all about content blocks
 router.get('/content', async (req, res) => {
   try {
+    const store = getLocalStore();
     const { data, error } = await supabase
       .from('about_content')
       .select('*')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data)) {
-      const store = getLocalStore();
-      store.aboutContent = data;
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const storeMap = new Map((store.aboutContent || []).map(a => [String(a.id), a]));
+      const storeMapByTitle = new Map((store.aboutContent || []).map(a => [a.title?.toLowerCase().trim(), a]));
+
+      const mergedContent = data.map((dbItem, index) => {
+        const local = storeMap.get(String(dbItem.id)) || storeMapByTitle.get(dbItem.title?.toLowerCase().trim()) || {};
+        return {
+          ...dbItem,
+          display_order: dbItem.display_order !== undefined && dbItem.display_order !== 0 ? dbItem.display_order : (local.display_order !== undefined ? local.display_order : index)
+        };
+      });
+
+      const dbIds = new Set(data.map(d => String(d.id)));
+      (store.aboutContent || []).forEach(a => {
+        if (!dbIds.has(String(a.id))) mergedContent.push(a);
+      });
+
+      mergedContent.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+      store.aboutContent = mergedContent;
       saveLocalStore(store);
-      return res.json({ success: true, count: data.length, content: data });
+
+      return res.json({ success: true, count: mergedContent.length, content: mergedContent });
     }
 
-    const store = getLocalStore();
-    res.json({ success: true, count: (store.aboutContent || []).length, content: store.aboutContent || [] });
+    let fallback = (store.aboutContent && store.aboutContent.length > 0) ? store.aboutContent : DEFAULT_ABOUT_CONTENT;
+    fallback = [...fallback].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    store.aboutContent = fallback;
+    saveLocalStore(store);
+
+    res.json({ success: true, count: fallback.length, content: fallback });
   } catch (err) {
     const store = getLocalStore();
-    res.json({ success: true, count: (store.aboutContent || []).length, content: store.aboutContent || [] });
+    let fallback = (store.aboutContent && store.aboutContent.length > 0) ? store.aboutContent : DEFAULT_ABOUT_CONTENT;
+    fallback = [...fallback].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    res.json({ success: true, count: fallback.length, content: fallback });
   }
 });
 
@@ -40,10 +64,13 @@ router.post('/content', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Title and Description are required' });
     }
 
+    const store = getLocalStore();
+    const nextOrder = display_order !== undefined ? Number(display_order) : (store.aboutContent ? store.aboutContent.length : 0);
+
     const newContent = {
       title,
       description,
-      display_order: display_order !== undefined ? Number(display_order) : 0
+      display_order: nextOrder
     };
 
     let assignedId = null;
@@ -63,7 +90,6 @@ router.post('/content', async (req, res) => {
     }
 
     const finalItem = dbItem || { id: "abt_" + Date.now(), ...newContent, created_at: new Date().toISOString() };
-    const store = getLocalStore();
     if (!store.aboutContent) store.aboutContent = [];
     store.aboutContent.push(finalItem);
     saveLocalStore(store);
@@ -165,37 +191,55 @@ router.put('/content/reorder', async (req, res) => {
 });
 
 
+// ==========================================
+// 2. MY JOURNEY (TIMELINE) ROUTES
+// ==========================================
+
 // GET all journey timeline items
 router.get('/journey', async (req, res) => {
   try {
+    const store = getLocalStore();
     const { data, error } = await supabase
       .from('journey_items')
       .select('*')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data)) {
-      const store = getLocalStore();
-      store.journeyItems = data;
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const storeMap = new Map((store.journeyItems || []).map(j => [String(j.id), j]));
+      const storeMapByTitle = new Map((store.journeyItems || []).map(j => [j.title?.toLowerCase().trim(), j]));
+
+      const mergedJourney = data.map((dbItem, index) => {
+        const local = storeMap.get(String(dbItem.id)) || storeMapByTitle.get(dbItem.title?.toLowerCase().trim()) || {};
+        return {
+          ...dbItem,
+          display_order: dbItem.display_order !== undefined && dbItem.display_order !== 0 ? dbItem.display_order : (local.display_order !== undefined ? local.display_order : index)
+        };
+      });
+
+      const dbIds = new Set(data.map(d => String(d.id)));
+      (store.journeyItems || []).forEach(j => {
+        if (!dbIds.has(String(j.id))) mergedJourney.push(j);
+      });
+
+      mergedJourney.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+      store.journeyItems = mergedJourney;
       saveLocalStore(store);
-      return res.json({ success: true, count: data.length, journey: data });
+
+      return res.json({ success: true, count: mergedJourney.length, journey: mergedJourney });
     }
 
-    const store = getLocalStore();
-    const sortedItems = [...(store.journeyItems || [])].sort((a, b) => {
-      const oa = a.display_order !== undefined ? Number(a.display_order) : 0;
-      const ob = b.display_order !== undefined ? Number(b.display_order) : 0;
-      return oa - ob;
-    });
-    res.json({ success: true, count: sortedItems.length, journey: sortedItems });
+    let fallback = (store.journeyItems && store.journeyItems.length > 0) ? store.journeyItems : DEFAULT_JOURNEY_ITEMS;
+    fallback = [...fallback].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    store.journeyItems = fallback;
+    saveLocalStore(store);
+
+    res.json({ success: true, count: fallback.length, journey: fallback });
   } catch (err) {
     const store = getLocalStore();
-    const sortedItems = [...(store.journeyItems || [])].sort((a, b) => {
-      const oa = a.display_order !== undefined ? Number(a.display_order) : 0;
-      const ob = b.display_order !== undefined ? Number(b.display_order) : 0;
-      return oa - ob;
-    });
-    res.json({ success: true, count: sortedItems.length, journey: sortedItems });
+    let fallback = (store.journeyItems && store.journeyItems.length > 0) ? store.journeyItems : DEFAULT_JOURNEY_ITEMS;
+    fallback = [...fallback].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    res.json({ success: true, count: fallback.length, journey: fallback });
   }
 });
 
@@ -207,6 +251,9 @@ router.post('/journey', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Title and Organization are required' });
     }
 
+    const store = getLocalStore();
+    const nextOrder = display_order !== undefined ? Number(display_order) : (store.journeyItems ? store.journeyItems.length : 0);
+
     const newJourney = {
       type: type || 'Education',
       title,
@@ -214,7 +261,7 @@ router.post('/journey', async (req, res) => {
       period: period || '',
       location: location || '',
       description: description || '',
-      display_order: display_order !== undefined ? Number(display_order) : 0
+      display_order: nextOrder
     };
 
     let assignedId = null;
@@ -234,7 +281,6 @@ router.post('/journey', async (req, res) => {
     }
 
     const finalItem = dbItem || { id: "jrn_" + Date.now(), ...newJourney, created_at: new Date().toISOString() };
-    const store = getLocalStore();
     if (!store.journeyItems) store.journeyItems = [];
     store.journeyItems.push(finalItem);
     saveLocalStore(store);
@@ -336,4 +382,3 @@ router.put('/journey/reorder', async (req, res) => {
 });
 
 export default router;
-

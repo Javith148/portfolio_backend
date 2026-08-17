@@ -1,72 +1,41 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
-import { getLocalStore, saveLocalStore, DEFAULT_GRADIENTS } from '../config/store.js';
 
 const router = express.Router();
 
-// GET all projects
+// GET all projects (stored directly in Supabase)
 router.get('/', async (req, res) => {
   try {
-    const store = getLocalStore();
     const { data, error } = await supabase
       .from('projects')
       .select('*')
+      .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
-      const storeMap = new Map((store.projects || []).map(sp => [String(sp.id), sp]));
-
-      const mergedProjects = data.map((dbProj, index) => {
-        const local = storeMap.get(String(dbProj.id)) || {};
-        
-        // Priority:
-        // 1. Explicit gradient/color from dbProj (if stored in Supabase)
-        // 2. Customized local gradient from store if available
-        // 3. Fallback to distinct preset gradient based on index
-        let finalGradient = dbProj.gradient || dbProj.color || local.gradient || local.color;
-        if (!finalGradient) {
-          finalGradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
-        }
-
+    if (!error && Array.isArray(data)) {
+      const formatted = data.map(dbProj => {
+        const g = dbProj.gradient || dbProj.color || 'linear-gradient(175deg, #7F17DA 0%, #737373 100%)';
         return {
           ...dbProj,
-          short_desc: dbProj.short_desc || local.short_desc || dbProj.description?.substring(0, 120) || '',
-          gradient: finalGradient,
-          color: finalGradient,
-          live_link: dbProj.live_link || local.live_link || '#',
-          github_link: dbProj.github_link || local.github_link || '#',
-          is_featured: dbProj.is_featured !== undefined ? dbProj.is_featured : (local.is_featured !== undefined ? local.is_featured : true),
-          display_order: dbProj.display_order !== undefined ? dbProj.display_order : (local.display_order || 0)
+          short_desc: dbProj.short_desc || dbProj.description?.substring(0, 120) || '',
+          gradient: g,
+          color: g,
+          live_link: dbProj.live_link || '#',
+          github_link: dbProj.github_link || '#',
+          is_featured: dbProj.is_featured !== undefined ? dbProj.is_featured : true,
+          display_order: dbProj.display_order ?? 0
         };
       });
-
-      // Also append local projects not found in Supabase data
-      const dbIds = new Set(data.map(d => String(d.id)));
-      (store.projects || []).forEach(sp => {
-        if (!dbIds.has(String(sp.id))) mergedProjects.push(sp);
-      });
-
-      // Cache updated list in store
-      saveLocalStore({ ...store, projects: mergedProjects });
-
-      return res.json({ success: true, count: mergedProjects.length, projects: mergedProjects });
+      return res.json({ success: true, count: formatted.length, projects: formatted });
     }
 
-    // Fallback if Supabase error or empty
-    const storeMap = store.projects || [];
-    const fallbackProjects = storeMap.map((p, index) => {
-      const g = p.gradient || p.color || DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
-      return { ...p, gradient: g, color: g };
-    });
-
-    res.json({ success: true, count: fallbackProjects.length, projects: fallbackProjects });
+    res.json({ success: false, error: error?.message || 'Failed to fetch projects from Supabase', projects: [] });
   } catch (err) {
-    const store = getLocalStore();
-    res.json({ success: true, count: store.projects.length, projects: store.projects });
+    res.status(500).json({ success: false, error: err.message, projects: [] });
   }
 });
 
-// REORDER projects
+// REORDER projects directly in Supabase
 router.put('/reorder', async (req, res) => {
   try {
     const { orderedIds } = req.body;
@@ -74,30 +43,23 @@ router.put('/reorder', async (req, res) => {
       return res.status(400).json({ success: false, error: 'orderedIds array is required' });
     }
 
-    const store = getLocalStore();
-    const projectMap = new Map(store.projects.map(p => [p.id, p]));
-    const reordered = [];
+    const updates = orderedIds.map((id, index) => 
+      supabase.from('projects').update({ display_order: index }).eq('id', id)
+    );
+    await Promise.all(updates);
 
-    orderedIds.forEach((id, index) => {
-      const p = projectMap.get(id);
-      if (p) {
-        p.display_order = index;
-        reordered.push(p);
-        projectMap.delete(id);
-      }
-    });
+    const { data } = await supabase
+      .from('projects')
+      .select('*')
+      .order('display_order', { ascending: true });
 
-    projectMap.forEach(p => reordered.push(p));
-    store.projects = reordered;
-    saveLocalStore(store);
-
-    res.json({ success: true, message: 'Projects reordered successfully', projects: store.projects });
+    res.json({ success: true, message: 'Projects reordered successfully in Supabase', projects: data || [] });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST create project
+// POST create project directly in Supabase
 router.post('/', async (req, res) => {
   try {
     const { title, description, short_desc, category, image_url, live_link, github_link, gradient, color, tags, display_order, is_featured } = req.body;
@@ -107,7 +69,7 @@ router.post('/', async (req, res) => {
     }
 
     const tagsArray = Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()) : []);
-    const projGradient = gradient || color || DEFAULT_GRADIENTS[0];
+    const projGradient = gradient || color || 'linear-gradient(175deg, #7F17DA 0%, #737373 100%)';
 
     const fullProjectData = {
       title,
@@ -124,44 +86,24 @@ router.post('/', async (req, res) => {
       is_featured: is_featured !== undefined ? is_featured : true
     };
 
-    let assignedId = "proj_" + Date.now();
-
-    // Insert into Supabase
-    try {
-      let { data, error } = await supabase.from('projects').insert([fullProjectData]).select();
-      if (error) {
-        const corePayload = {
-          title,
-          description,
-          category: category || 'Web App',
-          image_url: image_url || '',
-          live_link: live_link || '#',
-          github_link: github_link || '#',
-          tags: tagsArray
-        };
-        const res2 = await supabase.from('projects').insert([corePayload]).select();
-        data = res2.data;
+    const { data, error } = await supabase.from('projects').insert([fullProjectData]).select();
+    if (error) {
+      const payloadWithoutColor = { ...fullProjectData };
+      delete payloadWithoutColor.color;
+      const res2 = await supabase.from('projects').insert([payloadWithoutColor]).select();
+      if (res2.error) {
+        return res.status(500).json({ success: false, error: res2.error.message });
       }
-      if (data && data[0]) {
-        assignedId = data[0].id;
-      }
-    } catch (e) {
-      console.error('Supabase exception:', e.message);
+      return res.status(201).json({ success: true, message: 'Project created in Supabase', project: res2.data[0] });
     }
 
-    const storeItem = { id: assignedId, ...fullProjectData, created_at: new Date().toISOString() };
-
-    const store = getLocalStore();
-    store.projects.unshift(storeItem);
-    saveLocalStore(store);
-
-    res.status(201).json({ success: true, message: 'Project created successfully', project: storeItem });
+    res.status(201).json({ success: true, message: 'Project created in Supabase', project: data[0] });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// PUT update project
+// PUT update project directly in Supabase
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,63 +124,42 @@ router.put('/:id', async (req, res) => {
       supabasePayload.color = updatedGradient;
     }
 
-    if (Object.keys(supabasePayload).length > 0) {
-      try {
-        const { error } = await supabase.from('projects').update(supabasePayload).eq('id', id);
-        if (error) {
-          const coreKeys = ['title', 'description', 'category', 'image_url', 'live_link', 'github_link', 'tags'];
-          const corePayload = {};
-          Object.keys(body).forEach(k => { if (coreKeys.includes(k)) corePayload[k] = body[k]; });
-          await supabase.from('projects').update(corePayload).eq('id', id);
-        }
-      } catch (e) {}
+    if (Array.isArray(body.tags)) {
+      supabasePayload.tags = body.tags;
+    } else if (typeof body.tags === 'string') {
+      supabasePayload.tags = body.tags.split(',').map(t => t.trim());
     }
 
-    const store = getLocalStore();
-    const idx = store.projects.findIndex(p => String(p.id) === String(id));
-    if (idx !== -1) {
-      store.projects[idx] = {
-        ...store.projects[idx],
-        ...body,
-        gradient: updatedGradient || store.projects[idx].gradient,
-        color: updatedGradient || store.projects[idx].color,
-        tags: Array.isArray(body.tags) ? body.tags : (body.tags ? body.tags.split(',').map(t => t.trim()) : store.projects[idx].tags)
-      };
-    } else {
-      store.projects.push({ 
-        id, 
-        ...body,
-        gradient: updatedGradient,
-        color: updatedGradient
-      });
+    const { data, error } = await supabase.from('projects').update(supabasePayload).eq('id', id).select();
+    if (error) {
+      delete supabasePayload.color;
+      const res2 = await supabase.from('projects').update(supabasePayload).eq('id', id).select();
+      if (res2.error) {
+        return res.status(500).json({ success: false, error: res2.error.message });
+      }
+      return res.json({ success: true, message: 'Project updated in Supabase', project: res2.data[0] });
     }
-    saveLocalStore(store);
 
-    res.json({ success: true, message: 'Project updated successfully' });
+    res.json({ success: true, message: 'Project updated in Supabase', project: data[0] });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// DELETE project
+// DELETE project directly in Supabase
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    try {
-      await supabase.from('projects').delete().eq('id', id);
-    } catch (e) {}
+    const { error } = await supabase.from('projects').delete().eq('id', id);
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
 
-    const store = getLocalStore();
-    store.projects = store.projects.filter(p => String(p.id) !== String(id));
-    saveLocalStore(store);
-
-    res.json({ success: true, message: 'Project deleted successfully' });
+    res.json({ success: true, message: 'Project deleted from Supabase' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 export default router;
-
-
