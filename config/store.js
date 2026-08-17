@@ -17,23 +17,37 @@ export const DEFAULT_GRADIENTS = [
 export const DEFAULT_ABOUT_CONTENT = [
   {
     id: "abt_seed_1",
-    title: "🎨 Creative Problem Solving",
-    description: "Designing elegant UI/UX interfaces with Flutter and React that delight users and deliver seamless performance across devices.",
+    title: "🎨 Creative at Heart",
+    description: "I love bringing ideas to life visually before a single line of code is written. Whether it’s sketching wireframes on paper or designing sleek UI components in Figma, creativity is always at the core of what I do. Design, to me, isn’t just about how it looks — it’s about how it works.",
     display_order: 0,
     created_at: new Date().toISOString()
   },
   {
     id: "abt_seed_2",
-    title: "⚡ Backend Architecture",
-    description: "Building robust RESTful APIs, secure authentication systems, and optimized database solutions using Node.js, Express, Django, and Supabase.",
+    title: "🎧 Fueled by Music",
+    description: "My best work is often accompanied by the rhythm of music. From chill lo-fi beats during deep focus sessions to energizing tracks when pushing deadlines — music keeps my mind sharp and my flow uninterrupted",
     display_order: 1,
     created_at: new Date().toISOString()
   },
   {
     id: "abt_seed_3",
-    title: "🚀 Continuous Learning",
-    description: "Exploring bleeding-edge tech stacks, mobile responsiveness, and constantly sharpening software engineering skills to build better applications.",
+    title: "🌙 Late-Night Dev Flow",
+    description: "There’s something magical about building features in the quiet of the night — when everything’s still, and ideas flow effortlessly. It’s my favorite time to get into deep focus and bring concepts to life.",
     display_order: 2,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "abt_seed_4",
+    title: "🎮 Play = Progress",
+    description: "Gaming is more than just fun — it sharpens my problem-solving mindset. Whether it’s strategy, storytelling, or UI in game menus, I find design inspiration in the digital worlds I explore.",
+    display_order: 3,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "abt_seed_5",
+    title: "🌐 Passion for Development",
+    description: "There’s something exciting about the web’s endless possibility. I love building things that live online — accessible, responsive, and open to the world. Each project is a chance to contribute something useful and beautiful to the internet.",
+    display_order: 4,
     created_at: new Date().toISOString()
   }
 ];
@@ -41,23 +55,23 @@ export const DEFAULT_ABOUT_CONTENT = [
 export const DEFAULT_JOURNEY_ITEMS = [
   {
     id: "jrn_seed_1",
-    type: "Education",
-    title: "B.E. Computer Science Engineering",
-    organization: "Anna University / Institution",
-    period: "2021 - 2025",
-    location: "Tamil Nadu, India",
-    description: "Specialized in Core Computer Science, Software Architecture, Data Structures, Web Technologies & Mobile App Development.",
-    display_order: 0,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "jrn_seed_2",
     type: "Work Experience",
     title: "Full Stack & Mobile Developer",
     organization: "Freelance & Portfolio Development",
     period: "2023 - Present",
     location: "Remote / Chennai, India",
     description: "Developed cross-platform Flutter mobile applications and modern React web applications with Node.js & Django backends.",
+    display_order: 0,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "jrn_seed_2",
+    type: "Education",
+    title: "B.E. Computer Science Engineering",
+    organization: "Anna University / Institution",
+    period: "2021 - 2025",
+    location: "Tamil Nadu, India",
+    description: "Specialized in Core Computer Science, Software Architecture, Data Structures, Web Technologies & Mobile App Development.",
     display_order: 1,
     created_at: new Date().toISOString()
   }

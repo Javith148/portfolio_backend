@@ -1,0 +1,88 @@
+{
+  "projects": [],
+  "skills": [],
+  "contacts": [],
+  "aboutContent": [
+    {
+      "id": "52c11b13-8495-4a6c-b621-b022d55cbf0f",
+      "title": "🎨 Creative at Heart",
+      "description": "I love bringing ideas to life visually before a single line of code is written. Whether it’s sketching wireframes on paper or designing sleek UI components in Figma, creativity is always at the core of what I do. Design, to me, isn’t just about how it looks — it’s about how it works.",
+      "display_order": 0,
+      "created_at": "2026-08-17T07:40:38.900208+00:00"
+    },
+    {
+      "id": "16d01268-457f-4ae7-b92f-f7b58530a9d9",
+      "title": "🎧 Fueled by Music",
+      "description": "My best work is often accompanied by the rhythm of music. From chill lo-fi beats during deep focus sessions to energizing tracks when pushing deadlines — music keeps my mind sharp and my flow uninterrupted",
+      "display_order": 1,
+      "created_at": "2026-08-17T07:40:38.900208+00:00"
+    },
+    {
+      "id": "8a6ab161-28bf-4ff6-a21d-a33f71b4b18f",
+      "title": "🌙 Late-Night Dev Flow",
+      "description": "There’s something magical about building features in the quiet of the night — when everything’s still, and ideas flow effortlessly. It’s my favorite time to get into deep focus and bring concepts to life.",
+      "display_order": 2,
+      "created_at": "2026-08-17T07:40:38.900208+00:00"
+    },
+    {
+      "id": "164cbf5a-8a54-4d2a-a29e-e8d176b8c022",
+      "title": "🎮 Play = Progress",
+      "description": "Gaming is more than just fun — it sharpens my problem-solving mindset. Whether it’s strategy, storytelling, or UI in game menus, I find design inspiration in the digital worlds I explore.",
+      "display_order": 3,
+      "created_at": "2026-08-17T07:40:38.900208+00:00"
+    },
+    {
+      "id": "6ec4c54b-bc28-425b-aff1-3342336a6564",
+      "title": "🌐 Passion for Development",
+      "description": "There’s something exciting about the web’s endless possibility. I love building things that live online — accessible, responsive, and open to the world. Each project is a chance to contribute something useful and beautiful to the internet.",
+      "display_order": 4,
+      "created_at": "2026-08-17T07:40:38.900208+00:00"
+    }
+  ],
+  "journeyItems": [
+    {
+      "id": "5bb1f464-7b85-444e-977f-d57c16071da3",
+      "type": "Work Experience",
+      "title": "Flutter Developer ",
+      "organization": "Sagbots ",
+      "period": "7.4.2026 - 7.72026",
+      "location": "Coimbatore ",
+      "description": "I worked as a Flutter Developer Intern at SagbOTS. My main role was developing and modifying Flutter UI screens using Dart. I also worked on API integration, debugging, and improving application functionality. This internship helped me gain practical experience in real-world Flutter development.",
+      "display_order": 0,
+      "created_at": "2026-08-16T16:11:12.217508+00:00"
+    },
+    {
+      "id": "ded1da16-7682-44b4-a53b-98f64959787b",
+      "type": "Education",
+      "title": "Flutter Full Stack Development",
+      "organization": "Nschool Academy",
+      "period": "1.9.2025 - 30 .3.2025",
+      "location": "Coimbatore  Tamilnadu, india ",
+      "description": "I completed Flutter Full Stack Development training at N School. During the training, I learned Dart and Flutter for mobile application development. I also learned the  Python and MySQL, including database concepts and CRUD operations. Through the training, I gained practical knowledge of building Flutter applications and understanding how frontend, backend, and database components work together",
+      "display_order": 1,
+      "created_at": "2026-08-16T16:01:14.394065+00:00"
+    },
+    {
+      "id": "3cf58161-29ac-4f31-9368-a6c4649fd708",
+      "type": "Education",
+      "title": "B.Sc Computer  Technology ",
+      "organization": "sri krishna adithya college of arts and science",
+      "period": "2022 - 2025",
+      "location": "Coimbatore Tamil Nadu, India",
+      "description": "During my college, I mainly learned the basics of HTML and CSS. I worked on creating simple web pages, designing layouts, styling elements, and understanding the basic structure of websites. I also gained a basic understanding of how frontend web development works.",
+      "display_order": 2,
+      "created_at": "2026-08-16T15:40:19.79679+00:00"
+    },
+    {
+      "id": "fe745fa8-a1a0-405f-9ebe-9f10051be4e2",
+      "type": "Milestone",
+      "title": "Mobile App development  internship ",
+      "organization": "NoviTech R&D Pvt Ltd",
+      "period": "12 .7.2023 -  30.6.2023 ",
+      "location": "Remote",
+      "description": "I completed a 15-day internship at NoviTech R&D Pvt. Ltd. During the internship, I mainly focused on learning Java basics and Android Studio. I learned basic Java concepts, Android project structure, UI components, and the fundamentals of Android application development. It was mainly a learning-based internship.",
+      "display_order": 3,
+      "created_at": "2026-08-16T15:40:19.79679+00:00"
+    }
+  ]
+}

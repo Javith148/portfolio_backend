@@ -19,27 +19,11 @@ router.get('/content', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      const storeMap = new Map((store.aboutContent || []).map(a => [String(a.id), a]));
-      const storeMapByTitle = new Map((store.aboutContent || []).map(a => [a.title?.toLowerCase().trim(), a]));
-
-      const mergedContent = data.map((dbItem, index) => {
-        const local = storeMap.get(String(dbItem.id)) || storeMapByTitle.get(dbItem.title?.toLowerCase().trim()) || {};
-        return {
-          ...dbItem,
-          display_order: dbItem.display_order !== undefined && dbItem.display_order !== 0 ? dbItem.display_order : (local.display_order !== undefined ? local.display_order : index)
-        };
-      });
-
-      const dbIds = new Set(data.map(d => String(d.id)));
-      (store.aboutContent || []).forEach(a => {
-        if (!dbIds.has(String(a.id))) mergedContent.push(a);
-      });
-
-      mergedContent.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
-      store.aboutContent = mergedContent;
+      data.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+      store.aboutContent = data;
       saveLocalStore(store);
 
-      return res.json({ success: true, count: mergedContent.length, content: mergedContent });
+      return res.json({ success: true, count: data.length, content: data });
     }
 
     let fallback = (store.aboutContent && store.aboutContent.length > 0) ? store.aboutContent : DEFAULT_ABOUT_CONTENT;
@@ -206,27 +190,11 @@ router.get('/journey', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      const storeMap = new Map((store.journeyItems || []).map(j => [String(j.id), j]));
-      const storeMapByTitle = new Map((store.journeyItems || []).map(j => [j.title?.toLowerCase().trim(), j]));
-
-      const mergedJourney = data.map((dbItem, index) => {
-        const local = storeMap.get(String(dbItem.id)) || storeMapByTitle.get(dbItem.title?.toLowerCase().trim()) || {};
-        return {
-          ...dbItem,
-          display_order: dbItem.display_order !== undefined && dbItem.display_order !== 0 ? dbItem.display_order : (local.display_order !== undefined ? local.display_order : index)
-        };
-      });
-
-      const dbIds = new Set(data.map(d => String(d.id)));
-      (store.journeyItems || []).forEach(j => {
-        if (!dbIds.has(String(j.id))) mergedJourney.push(j);
-      });
-
-      mergedJourney.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
-      store.journeyItems = mergedJourney;
+      data.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+      store.journeyItems = data;
       saveLocalStore(store);
 
-      return res.json({ success: true, count: mergedJourney.length, journey: mergedJourney });
+      return res.json({ success: true, count: data.length, journey: data });
     }
 
     let fallback = (store.journeyItems && store.journeyItems.length > 0) ? store.journeyItems : DEFAULT_JOURNEY_ITEMS;
