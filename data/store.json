@@ -1,25 +1,25 @@
 {
   "projects": [
     {
-      "id": "proj_1786978975777",
-      "title": "wegwegwbwe",
-      "description": "https://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/open",
-      "short_desc": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "title": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "description": "https://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/open",
+      "short_desc": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "category": "Web App",
-      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/whatsapp_image_2025_07_13_at_2_1786978967632.jpg",
+      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/whatsapp_image_2025_07_13_at_2_1786979383754.jpg",
       "live_link": "https://javiths-portfolio.vercel.app/open",
       "github_link": "https://javiths-portfolio.vercel.app/open",
-      "gradient": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
-      "color": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
       "tags": [
         "Flutter",
         "React",
-        "Tailwind",
         "python"
       ],
       "display_order": 0,
       "is_featured": true,
-      "created_at": "2026-08-17T15:02:55.777Z"
+      "id": "93d7a94d-eace-4e6c-a260-eedc72dfbb9d",
+      "created_at": "2026-08-17T15:09:31.390977+00:00",
+      "updated_at": "2026-08-17T15:09:31.390977+00:00"
     },
     {
       "id": "2a5f2d62-52d1-40a3-b7c7-f62f61dfa437",
@@ -61,8 +61,8 @@
       ],
       "created_at": "2026-08-06T15:26:16.218904+00:00",
       "updated_at": "2026-08-06T15:26:16.218904+00:00",
-      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
-      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "gradient": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "color": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
       "short_desc": "This portfolio is a React-powered web application designed to highlight my expertise in frontend development and UI/UX d",
       "is_featured": true,
       "display_order": 0
