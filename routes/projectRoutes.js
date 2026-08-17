@@ -6,11 +6,20 @@ const router = express.Router();
 // GET all projects (stored directly in Supabase)
 router.get('/', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('projects')
       .select('*')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
+
+    if (error) {
+      const fallbackQuery = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+      data = fallbackQuery.data;
+      error = fallbackQuery.error;
+    }
 
     if (!error && Array.isArray(data)) {
       const formatted = data.map(dbProj => {
