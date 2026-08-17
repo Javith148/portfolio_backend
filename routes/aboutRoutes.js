@@ -84,6 +84,43 @@ router.post('/content', async (req, res) => {
   }
 });
 
+// REORDER about content blocks
+router.put('/content/reorder', async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) return res.status(400).json({ success: false, error: 'orderedIds required' });
+
+    try {
+      const updates = orderedIds.map((id, index) => 
+        supabase.from('about_content').update({ display_order: index }).eq('id', id)
+      );
+      await Promise.all(updates);
+    } catch (e) {}
+
+    const store = getLocalStore();
+    if (!store.aboutContent) store.aboutContent = [];
+    const map = new Map(store.aboutContent.map(item => [String(item.id), item]));
+    const reordered = [];
+
+    orderedIds.forEach((id, index) => {
+      const item = map.get(String(id));
+      if (item) {
+        item.display_order = index;
+        reordered.push(item);
+        map.delete(String(id));
+      }
+    });
+
+    map.forEach(item => reordered.push(item));
+    store.aboutContent = reordered;
+    saveLocalStore(store);
+
+    res.json({ success: true, message: 'About content reordered', content: store.aboutContent });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // PUT update about content block
 router.put('/content/:id', async (req, res) => {
   try {
@@ -132,43 +169,6 @@ router.delete('/content/:id', async (req, res) => {
     saveLocalStore(store);
 
     res.json({ success: true, message: 'About content deleted' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// REORDER about content blocks
-router.put('/content/reorder', async (req, res) => {
-  try {
-    const { orderedIds } = req.body;
-    if (!Array.isArray(orderedIds)) return res.status(400).json({ success: false, error: 'orderedIds required' });
-
-    try {
-      const updates = orderedIds.map((id, index) => 
-        supabase.from('about_content').update({ display_order: index }).eq('id', id)
-      );
-      await Promise.all(updates);
-    } catch (e) {}
-
-    const store = getLocalStore();
-    if (!store.aboutContent) store.aboutContent = [];
-    const map = new Map(store.aboutContent.map(item => [String(item.id), item]));
-    const reordered = [];
-
-    orderedIds.forEach((id, index) => {
-      const item = map.get(String(id));
-      if (item) {
-        item.display_order = index;
-        reordered.push(item);
-        map.delete(String(id));
-      }
-    });
-
-    map.forEach(item => reordered.push(item));
-    store.aboutContent = reordered;
-    saveLocalStore(store);
-
-    res.json({ success: true, message: 'About content reordered', content: store.aboutContent });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -259,6 +259,43 @@ router.post('/journey', async (req, res) => {
   }
 });
 
+// REORDER journey items
+router.put('/journey/reorder', async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) return res.status(400).json({ success: false, error: 'orderedIds required' });
+
+    try {
+      const updates = orderedIds.map((id, index) => 
+        supabase.from('journey_items').update({ display_order: index }).eq('id', id)
+      );
+      await Promise.all(updates);
+    } catch (e) {}
+
+    const store = getLocalStore();
+    if (!store.journeyItems) store.journeyItems = [];
+    const map = new Map(store.journeyItems.map(item => [String(item.id), item]));
+    const reordered = [];
+
+    orderedIds.forEach((id, index) => {
+      const item = map.get(String(id));
+      if (item) {
+        item.display_order = index;
+        reordered.push(item);
+        map.delete(String(id));
+      }
+    });
+
+    map.forEach(item => reordered.push(item));
+    store.journeyItems = reordered;
+    saveLocalStore(store);
+
+    res.json({ success: true, message: 'Journey items reordered', journey: store.journeyItems });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // PUT update journey item
 router.put('/journey/:id', async (req, res) => {
   try {
@@ -307,43 +344,6 @@ router.delete('/journey/:id', async (req, res) => {
     saveLocalStore(store);
 
     res.json({ success: true, message: 'Journey item deleted' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// REORDER journey items
-router.put('/journey/reorder', async (req, res) => {
-  try {
-    const { orderedIds } = req.body;
-    if (!Array.isArray(orderedIds)) return res.status(400).json({ success: false, error: 'orderedIds required' });
-
-    try {
-      const updates = orderedIds.map((id, index) => 
-        supabase.from('journey_items').update({ display_order: index }).eq('id', id)
-      );
-      await Promise.all(updates);
-    } catch (e) {}
-
-    const store = getLocalStore();
-    if (!store.journeyItems) store.journeyItems = [];
-    const map = new Map(store.journeyItems.map(item => [String(item.id), item]));
-    const reordered = [];
-
-    orderedIds.forEach((id, index) => {
-      const item = map.get(String(id));
-      if (item) {
-        item.display_order = index;
-        reordered.push(item);
-        map.delete(String(id));
-      }
-    });
-
-    map.forEach(item => reordered.push(item));
-    store.journeyItems = reordered;
-    saveLocalStore(store);
-
-    res.json({ success: true, message: 'Journey items reordered', journey: store.journeyItems });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
