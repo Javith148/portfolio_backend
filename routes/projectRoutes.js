@@ -142,16 +142,8 @@ router.post('/', async (req, res) => {
       if (!error && data && data[0]) {
         assignedItem = { ...fullProjectData, ...data[0], gradient: projGradient, color: projGradient };
       } else if (error) {
-        // Fallback: strip gradient & color if DB schema missing gradient/color
-        const minimalPayload = {
-          title,
-          description,
-          category: category || 'Web App',
-          image_url: image_url || '',
-          live_link: live_link || '#',
-          github_link: github_link || '#',
-          tags: tagsArray
-        };
+        const minimalPayload = { ...dbPayload };
+        delete minimalPayload.short_desc;
         const res2 = await supabase.from('projects').insert([minimalPayload]).select();
         if (!res2.error && res2.data && res2.data[0]) {
           assignedItem = { ...fullProjectData, ...res2.data[0], gradient: projGradient, color: projGradient };
@@ -204,10 +196,7 @@ router.put('/:id', async (req, res) => {
       if (!error && data && data[0]) {
         updatedDbItem = data[0];
       } else if (error) {
-        // Strip gradient & color if schema doesn't support them and retry update
         const minimalPayload = { ...dbPayload };
-        delete minimalPayload.gradient;
-        delete minimalPayload.color;
         delete minimalPayload.short_desc;
         const res2 = await supabase.from('projects').update(minimalPayload).eq('id', id).select();
         if (!res2.error && res2.data && res2.data[0]) {

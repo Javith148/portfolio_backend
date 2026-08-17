@@ -1,27 +1,6 @@
 {
   "projects": [
     {
-      "title": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
-      "description": "https://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/open",
-      "short_desc": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      "category": "Web App",
-      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/whatsapp_image_2025_07_13_at_2_1786979383754.jpg",
-      "live_link": "https://javiths-portfolio.vercel.app/open",
-      "github_link": "https://javiths-portfolio.vercel.app/open",
-      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
-      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
-      "tags": [
-        "Flutter",
-        "React",
-        "python"
-      ],
-      "display_order": 0,
-      "is_featured": true,
-      "id": "93d7a94d-eace-4e6c-a260-eedc72dfbb9d",
-      "created_at": "2026-08-17T15:09:31.390977+00:00",
-      "updated_at": "2026-08-17T15:09:31.390977+00:00"
-    },
-    {
       "id": "2a5f2d62-52d1-40a3-b7c7-f62f61dfa437",
       "title": "Smart Electrician Booking website",
       "description": "This web platform connects users with nearby certified electricians using real-time geolocation powered by Leaflet.js and OpenStreetMap. Developed with Flask, HTML, CSS, and JavaScript, it offers a smooth and responsive user experience. Key features include secure login, a simple booking form, and support for multiple payment methods such as UPI and PayPal. The system also integrates automated email notifications and a MySQL database to ensure seamless booking and data management.",
@@ -38,8 +17,8 @@
       ],
       "created_at": "2026-08-06T15:32:03.131567+00:00",
       "updated_at": "2026-08-06T15:32:03.131567+00:00",
-      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
-      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "gradient": "linear-gradient(175deg, #4851FF 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #4851FF 0%, #737373 100%)",
       "short_desc": "This web platform connects users with nearby certified electricians using real-time geolocation powered by Leaflet.js an",
       "is_featured": true,
       "display_order": 0
@@ -61,11 +40,33 @@
       ],
       "created_at": "2026-08-06T15:26:16.218904+00:00",
       "updated_at": "2026-08-06T15:26:16.218904+00:00",
-      "gradient": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
-      "color": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
       "short_desc": "This portfolio is a React-powered web application designed to highlight my expertise in frontend development and UI/UX d",
       "is_featured": true,
-      "display_order": 0
+      "display_order": 1
+    },
+    {
+      "title": "zzzzzzzzzzzzzzzzzzzzzzz",
+      "description": "https://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/open",
+      "short_desc": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "category": "Web App",
+      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/whatsapp_image_2025_07_13_at_2_1786979827829.jpg",
+      "live_link": "https://javiths-portfolio.vercel.app/open",
+      "github_link": "https://javiths-portfolio.vercel.app/open",
+      "gradient": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "color": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "tags": [
+        "Tailwind",
+        "python",
+        "Flutter",
+        "React"
+      ],
+      "display_order": 2,
+      "is_featured": true,
+      "id": "72fcc030-b3ce-4d08-9d1f-24242f0610b4",
+      "created_at": "2026-08-17T15:17:20.819589+00:00",
+      "updated_at": "2026-08-17T15:17:20.819589+00:00"
     },
     {
       "id": "332bdec9-0725-4d98-bc26-c54662c74284",
@@ -82,14 +83,15 @@
       ],
       "created_at": "2026-08-06T15:15:08.239822+00:00",
       "updated_at": "2026-08-06T15:15:08.239822+00:00",
-      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
-      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "gradient": "linear-gradient(175deg, #EB7B18 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #EB7B18 0%, #737373 100%)",
       "short_desc": "Curryard is a creatively themed restaurant website built to attract food enthusiasts with a taste for adventure. It blen",
       "is_featured": true,
-      "display_order": 0
+      "display_order": 3
     }
   ],
   "skills": [],
+  "certificates": [],
   "contacts": [],
   "aboutContent": [
     {
