@@ -4,23 +4,25 @@ import { getLocalStore, saveLocalStore, DEFAULT_GRADIENTS } from '../config/stor
 
 const router = express.Router();
 
+// Helper to filter payload keys that match valid database schema columns
+const sanitizeSupabasePayload = (data) => {
+  const allowedCols = ['title', 'description', 'short_desc', 'category', 'image_url', 'live_link', 'github_link', 'tags', 'gradient', 'color'];
+  const payload = {};
+  allowedCols.forEach(col => {
+    if (data[col] !== undefined) {
+      payload[col] = data[col];
+    }
+  });
+  return payload;
+};
+
 // GET all projects (stored in Supabase & synchronized with store)
 router.get('/', async (req, res) => {
   try {
     let { data, error } = await supabase
       .from('projects')
       .select('*')
-      .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
-
-    if (error) {
-      const fallbackQuery = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
-      data = fallbackQuery.data;
-      error = fallbackQuery.error;
-    }
 
     const store = getLocalStore();
     const storeMap = new Map((store.projects || []).map(p => [String(p.id), p]));
@@ -31,16 +33,20 @@ router.get('/', async (req, res) => {
         const matchedStore = storeMap.get(String(dbProj.id)) || storeTitleMap.get(String(dbProj.title).toLowerCase());
         const g = dbProj.gradient || dbProj.color || matchedStore?.gradient || matchedStore?.color || DEFAULT_GRADIENTS[idx % DEFAULT_GRADIENTS.length];
         return {
+          ...matchedStore,
           ...dbProj,
-          short_desc: dbProj.short_desc || dbProj.description?.substring(0, 120) || '',
+          short_desc: dbProj.short_desc || matchedStore?.short_desc || dbProj.description?.substring(0, 120) || '',
           gradient: g,
           color: g,
           live_link: dbProj.live_link || '#',
           github_link: dbProj.github_link || '#',
-          is_featured: dbProj.is_featured !== undefined ? dbProj.is_featured : true,
-          display_order: dbProj.display_order ?? 0
+          is_featured: matchedStore?.is_featured !== undefined ? matchedStore.is_featured : (dbProj.is_featured !== undefined ? dbProj.is_featured : true),
+          display_order: matchedStore?.display_order !== undefined ? matchedStore.display_order : (dbProj.display_order ?? idx)
         };
       });
+
+      // Sort by display_order if available
+      formatted.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 
       store.projects = formatted;
       saveLocalStore(store);
@@ -61,7 +67,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// REORDER projects directly in Supabase
+// REORDER projects
 router.put('/reorder', async (req, res) => {
   try {
     const { orderedIds } = req.body;
@@ -129,19 +135,26 @@ router.post('/', async (req, res) => {
 
     let assignedItem = null;
 
-    // Try inserting into Supabase
+    // Try inserting into Supabase using sanitized payload
     try {
-      const { data, error } = await supabase.from('projects').insert([fullProjectData]).select();
+      const dbPayload = sanitizeSupabasePayload(fullProjectData);
+      const { data, error } = await supabase.from('projects').insert([dbPayload]).select();
       if (!error && data && data[0]) {
-        assignedItem = { ...data[0], gradient: projGradient, color: projGradient };
+        assignedItem = { ...fullProjectData, ...data[0], gradient: projGradient, color: projGradient };
       } else if (error) {
-        // If Supabase column gradient or color missing, strip gradient/color and retry
-        const strippedPayload = { ...fullProjectData };
-        delete strippedPayload.gradient;
-        delete strippedPayload.color;
-        const res2 = await supabase.from('projects').insert([strippedPayload]).select();
+        // Fallback: strip gradient & color if DB schema missing gradient/color
+        const minimalPayload = {
+          title,
+          description,
+          category: category || 'Web App',
+          image_url: image_url || '',
+          live_link: live_link || '#',
+          github_link: github_link || '#',
+          tags: tagsArray
+        };
+        const res2 = await supabase.from('projects').insert([minimalPayload]).select();
         if (!res2.error && res2.data && res2.data[0]) {
-          assignedItem = { ...res2.data[0], gradient: projGradient, color: projGradient };
+          assignedItem = { ...fullProjectData, ...res2.data[0], gradient: projGradient, color: projGradient };
         }
       }
     } catch (e) {}
@@ -170,38 +183,33 @@ router.put('/:id', async (req, res) => {
     const body = req.body;
 
     const updatedGradient = body.gradient || body.color;
+    const projGradient = updatedGradient || body.gradient || body.color;
 
-    const allowedKeys = ['title', 'description', 'short_desc', 'category', 'image_url', 'live_link', 'github_link', 'gradient', 'color', 'tags', 'display_order', 'is_featured'];
-    const supabasePayload = {};
-    Object.keys(body).forEach(key => {
-      if (allowedKeys.includes(key)) {
-        supabasePayload[key] = body[key];
-      }
-    });
-
-    if (updatedGradient) {
-      supabasePayload.gradient = updatedGradient;
-      supabasePayload.color = updatedGradient;
+    const dbPayload = sanitizeSupabasePayload(body);
+    if (projGradient) {
+      dbPayload.gradient = projGradient;
+      dbPayload.color = projGradient;
     }
 
     if (Array.isArray(body.tags)) {
-      supabasePayload.tags = body.tags;
+      dbPayload.tags = body.tags;
     } else if (typeof body.tags === 'string') {
-      supabasePayload.tags = body.tags.split(',').map(t => t.trim());
+      dbPayload.tags = body.tags.split(',').map(t => t.trim());
     }
 
     let updatedDbItem = null;
 
     try {
-      const { data, error } = await supabase.from('projects').update(supabasePayload).eq('id', id).select();
+      const { data, error } = await supabase.from('projects').update(dbPayload).eq('id', id).select();
       if (!error && data && data[0]) {
         updatedDbItem = data[0];
       } else if (error) {
-        // Strip gradient and color if column doesn't exist in Supabase schema
-        const strippedPayload = { ...supabasePayload };
-        delete strippedPayload.gradient;
-        delete strippedPayload.color;
-        const res2 = await supabase.from('projects').update(strippedPayload).eq('id', id).select();
+        // Strip gradient & color if schema doesn't support them and retry update
+        const minimalPayload = { ...dbPayload };
+        delete minimalPayload.gradient;
+        delete minimalPayload.color;
+        delete minimalPayload.short_desc;
+        const res2 = await supabase.from('projects').update(minimalPayload).eq('id', id).select();
         if (!res2.error && res2.data && res2.data[0]) {
           updatedDbItem = res2.data[0];
         }
@@ -216,13 +224,17 @@ router.put('/:id', async (req, res) => {
         ...store.projects[idx],
         ...(updatedDbItem || {}),
         ...body,
-        ...(updatedGradient ? { gradient: updatedGradient, color: updatedGradient } : {})
+        ...(projGradient ? { gradient: projGradient, color: projGradient } : {})
       };
       saveLocalStore(store);
       return res.json({ success: true, message: 'Project updated successfully', project: store.projects[idx] });
     }
 
-    res.json({ success: true, message: 'Project updated successfully', project: updatedDbItem || body });
+    const mergedObj = { ...(updatedDbItem || {}), ...body, ...(projGradient ? { gradient: projGradient, color: projGradient } : {}) };
+    store.projects.push(mergedObj);
+    saveLocalStore(store);
+
+    res.json({ success: true, message: 'Project updated successfully', project: mergedObj });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

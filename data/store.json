@@ -1,7 +1,95 @@
 {
-  "projects": [],
+  "projects": [
+    {
+      "id": "proj_1786978975777",
+      "title": "wegwegwbwe",
+      "description": "https://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/openhttps://javiths-portfolio.vercel.app/open",
+      "short_desc": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "category": "Web App",
+      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/whatsapp_image_2025_07_13_at_2_1786978967632.jpg",
+      "live_link": "https://javiths-portfolio.vercel.app/open",
+      "github_link": "https://javiths-portfolio.vercel.app/open",
+      "gradient": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "color": "linear-gradient(175deg, #D91A1A 0%, #222222 100%)",
+      "tags": [
+        "Flutter",
+        "React",
+        "Tailwind",
+        "python"
+      ],
+      "display_order": 0,
+      "is_featured": true,
+      "created_at": "2026-08-17T15:02:55.777Z"
+    },
+    {
+      "id": "2a5f2d62-52d1-40a3-b7c7-f62f61dfa437",
+      "title": "Smart Electrician Booking website",
+      "description": "This web platform connects users with nearby certified electricians using real-time geolocation powered by Leaflet.js and OpenStreetMap. Developed with Flask, HTML, CSS, and JavaScript, it offers a smooth and responsive user experience. Key features include secure login, a simple booking form, and support for multiple payment methods such as UPI and PayPal. The system also integrates automated email notifications and a MySQL database to ensure seamless booking and data management.",
+      "category": "Web App",
+      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/pro__2__png_1786350213612.png",
+      "live_link": "https://smart-electrician-booking-website.vercel.app/",
+      "github_link": "https://github.com/Javith148/smart_eletrician_finder",
+      "tags": [
+        "HTML",
+        "CSS",
+        "Javascript ",
+        "python",
+        "MySQL "
+      ],
+      "created_at": "2026-08-06T15:32:03.131567+00:00",
+      "updated_at": "2026-08-06T15:32:03.131567+00:00",
+      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "short_desc": "This web platform connects users with nearby certified electricians using real-time geolocation powered by Leaflet.js an",
+      "is_featured": true,
+      "display_order": 0
+    },
+    {
+      "id": "015a3618-bdd0-4b7f-994e-c88115627393",
+      "title": "Portfolio",
+      "description": "This portfolio is a React-powered web application designed to highlight my expertise in frontend development and UI/UX design. Crafted with a sleek, modern layout, it offers a seamless user experience with smooth scrolling, responsive design, and interactive elements.",
+      "category": "Web App",
+      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/pro__1__png_1786352931154.png",
+      "live_link": "https://javiths-portfolio.vercel.app/",
+      "github_link": "https://github.com/Javith148/javiths_portfolio",
+      "tags": [
+        "React",
+        "Tailwind",
+        "Node js",
+        "Supabase",
+        "GitHub"
+      ],
+      "created_at": "2026-08-06T15:26:16.218904+00:00",
+      "updated_at": "2026-08-06T15:26:16.218904+00:00",
+      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "short_desc": "This portfolio is a React-powered web application designed to highlight my expertise in frontend development and UI/UX d",
+      "is_featured": true,
+      "display_order": 0
+    },
+    {
+      "id": "332bdec9-0725-4d98-bc26-c54662c74284",
+      "title": "Curryard",
+      "description": "Curryard is a creatively themed restaurant website built to attract food enthusiasts with a taste for adventure. It blends bold visuals, Halloween-inspired branding, and engaging UI elements to create a unique dining atmosphere online. From eye-catching menus to seamless reservation flow, every detail is crafted to reflect the eerie-yet-enticing vibe of the brand.",
+      "category": "Web App",
+      "image_url": "https://gpyqowljogtyxhmzsncj.supabase.co/storage/v1/object/public/portfolio-assets/pro1_png_1786352971585.png",
+      "live_link": "https://curryard.vercel.app/",
+      "github_link": "https://github.com/Javith148/Curryard",
+      "tags": [
+        "HTML",
+        "CSS",
+        "Figma"
+      ],
+      "created_at": "2026-08-06T15:15:08.239822+00:00",
+      "updated_at": "2026-08-06T15:15:08.239822+00:00",
+      "gradient": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "color": "linear-gradient(175deg, #7F17DA 0%, #737373 100%)",
+      "short_desc": "Curryard is a creatively themed restaurant website built to attract food enthusiasts with a taste for adventure. It blen",
+      "is_featured": true,
+      "display_order": 0
+    }
+  ],
   "skills": [],
-  "certificates": [],
   "contacts": [],
   "aboutContent": [
     {
