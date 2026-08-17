@@ -165,10 +165,6 @@ router.put('/content/reorder', async (req, res) => {
 });
 
 
-// ==========================================
-// 2. MY JOURNEY (TIMELINE) ROUTES
-// ==========================================
-
 // GET all journey timeline items
 router.get('/journey', async (req, res) => {
   try {
@@ -186,10 +182,20 @@ router.get('/journey', async (req, res) => {
     }
 
     const store = getLocalStore();
-    res.json({ success: true, count: (store.journeyItems || []).length, journey: store.journeyItems || [] });
+    const sortedItems = [...(store.journeyItems || [])].sort((a, b) => {
+      const oa = a.display_order !== undefined ? Number(a.display_order) : 0;
+      const ob = b.display_order !== undefined ? Number(b.display_order) : 0;
+      return oa - ob;
+    });
+    res.json({ success: true, count: sortedItems.length, journey: sortedItems });
   } catch (err) {
     const store = getLocalStore();
-    res.json({ success: true, count: (store.journeyItems || []).length, journey: store.journeyItems || [] });
+    const sortedItems = [...(store.journeyItems || [])].sort((a, b) => {
+      const oa = a.display_order !== undefined ? Number(a.display_order) : 0;
+      const ob = b.display_order !== undefined ? Number(b.display_order) : 0;
+      return oa - ob;
+    });
+    res.json({ success: true, count: sortedItems.length, journey: sortedItems });
   }
 });
 
